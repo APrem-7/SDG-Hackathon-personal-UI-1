@@ -8,10 +8,7 @@ export default function App() {
   const [autoSpec, setAutoSpec] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Load initial data on component mount
-  useEffect(() => {
-    loadInitialData();
-  }, []);
+  // No initial data loading - user must run queries
 
   async function loadInitialData() {
     try {
@@ -21,7 +18,7 @@ export default function App() {
         body: JSON.stringify({ prompt: "show product summary" }),
       });
       const { data, suggestedVegaLite } = await res.json();
-      
+
       if (data && data.length > 0) {
         const inferType = (v) =>
           typeof v === "number"
@@ -35,7 +32,9 @@ export default function App() {
           name: k,
           semanticType: inferType(data[0]?.[k]),
           analyticType:
-            inferType(data[0]?.[k]) === "quantitative" ? "measure" : "dimension",
+            inferType(data[0]?.[k]) === "quantitative"
+              ? "measure"
+              : "dimension",
         }));
 
         setRows(data);
@@ -49,7 +48,7 @@ export default function App() {
 
   async function ask() {
     if (!prompt.trim()) return;
-    
+
     setLoading(true);
     try {
       const res = await fetch("/api/nlq", {
@@ -123,9 +122,7 @@ export default function App() {
         ) : (
           <div className="flex items-center justify-center h-96 border-2 border-dashed border-gray-300 rounded-lg">
             <div className="text-center">
-              <div className="text-gray-500 mb-4">
-                📊 No data loaded yet
-              </div>
+              <div className="text-gray-500 mb-4">📊 No data loaded yet</div>
               <div className="text-sm text-gray-400">
                 Run a query to see the drag-and-drop interface
               </div>
