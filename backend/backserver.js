@@ -27,7 +27,7 @@ const mockShipmentData = [
     ExitTime: "2025-01-15T10:30:00",
     BayCode: "BAY01",
     ScheduledDate: "2025-01-15",
-    CreatedTime: "2025-01-14T08:00:00"
+    CreatedTime: "2025-01-14T08:00:00",
   },
   {
     GrossQuantity: 1500,
@@ -40,7 +40,7 @@ const mockShipmentData = [
     ExitTime: "2025-01-16T14:20:00",
     BayCode: "BAY02",
     ScheduledDate: "2025-01-16",
-    CreatedTime: "2025-01-15T09:30:00"
+    CreatedTime: "2025-01-15T09:30:00",
   },
   {
     GrossQuantity: 800,
@@ -53,8 +53,8 @@ const mockShipmentData = [
     ExitTime: "2025-01-17T11:45:00",
     BayCode: "BAY01",
     ScheduledDate: "2025-01-17",
-    CreatedTime: "2025-01-16T07:15:00"
-  }
+    CreatedTime: "2025-01-16T07:15:00",
+  },
 ];
 
 // 2) Strict schema for LLM output
@@ -229,12 +229,12 @@ Use column names EXACTLY from this list: ${[...ALLOWED_COLS].join(", ")}.`;
   // TODO: Replace with actual database query execution
   console.log("Generated SQL:", sql);
   console.log("Spec from Ollama:", JSON.stringify(spec, null, 2));
-  
+
   res.json({
     data: mockShipmentData.slice(0, spec.limit || 10),
     suggestedVegaLite: spec.suggestedVegaLite || null,
     sql,
-    note: "Using mock data - replace with actual database query"
+    note: "Using mock data - replace with actual database query",
   });
 });
 
