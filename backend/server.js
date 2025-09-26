@@ -45,6 +45,9 @@ async function queryOllama(prompt, context) {
 Available data fields: ${Object.keys(shipmentData[0] || {}).join(", ")}
 User query: "${prompt}"
 
+For bar charts, the data will be automatically aggregated by the x-field (grouped and summed).
+For questions about "flows by bay code" or similar, use BayCodeID for x-axis and GrossQuantity for y-axis.
+
 Respond with a JSON object containing:
 1. Data filtering criteria
 2. Chart configuration for automatic visualization
@@ -56,18 +59,19 @@ Example response:
     "minQuantity": 1000,
     "productCode": "ABC123"
   },
-  "limit": 100,
+  "limit": 500,
   "explanation": "Show shipments from 2017 with quantity above 1000",
   "chartConfig": {
     "chartType": "bar",
-    "xField": "BaseProductCode",
-    "yField": "GrossQuantity",
-    "title": "Shipment Quantities by Product Code"
+    "xField": "BayCodeID",
+    "yField": "GrossQuantity", 
+    "title": "Shipment Flows by Bay Code"
   }
 }
 
 Chart types available: bar, line, scatter, pie, area
-Field mappings: Use exact field names from available data fields.`,
+Field mappings: Use exact field names from available data fields.
+For bay code analysis, use BayCodeID as the grouping field.`,
         stream: false,
       }),
     });
@@ -92,8 +96,8 @@ function generateVegaLiteSpec(chartConfig, data) {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
     title: chartConfig.title || "Chart",
     data: { values: data },
-    width: 400,
-    height: 300,
+    width: 500,
+    height: 350,
   };
 
   switch (chartConfig.chartType) {
@@ -101,13 +105,24 @@ function generateVegaLiteSpec(chartConfig, data) {
       return {
         ...baseSpec,
         mark: "bar",
+        transform: [
+          {
+            aggregate: [{ op: "sum", field: chartConfig.yField, as: "total" }],
+            groupby: [chartConfig.xField, "BaseProductCode"],
+          },
+        ],
         encoding: {
           x: {
             field: chartConfig.xField,
             type: "nominal",
             axis: { labelAngle: -45 },
+            sort: { field: "total", op: "sum", order: "descending" },
           },
-          y: { field: chartConfig.yField, type: "quantitative" },
+          y: {
+            field: "total",
+            type: "quantitative",
+            title: chartConfig.yField,
+          },
           color: {
             field: "BaseProductCode",
             type: "nominal",
