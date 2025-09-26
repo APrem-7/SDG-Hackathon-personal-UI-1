@@ -1,5 +1,5 @@
-🚀 NLQ server running on http://localhost:3001
-📊 API available at http://localhost:3001/api/nlq
+ NLQ server running on http://localhost:3001
+ API available at http://localhost:3001/api/nlq
 Received query: show products
 Received query: show product summary
 Received query: show product summary

@@ -18,15 +18,15 @@ const dataPath = path.join(process.cwd(), "data.json");
 let shipmentData = [];
 
 try {
-  console.log("📂 Loading shipment data...");
+  console.log(" Loading shipment data...");
   const rawData = fs.readFileSync(dataPath, "utf8");
   shipmentData = rawData
     .trim()
     .split("\n")
     .map((line) => JSON.parse(line));
-  console.log(`✅ Loaded ${shipmentData.length} shipment records`);
+  console.log(`Loaded ${shipmentData.length} shipment records`);
 } catch (error) {
-  console.error("❌ Error loading data:", error.message);
+  console.error("Error loading data:", error.message);
   shipmentData = [];
 }
 
@@ -79,7 +79,7 @@ Field mappings: Use exact field names from available data fields.`,
     const data = await response.json();
     return data.response;
   } catch (error) {
-    console.error("🤖 Ollama error:", error.message);
+    console.error("Ollama error:", error.message);
     return null;
   }
 }
@@ -108,6 +108,12 @@ function generateVegaLiteSpec(chartConfig, data) {
             axis: { labelAngle: -45 },
           },
           y: { field: chartConfig.yField, type: "quantitative" },
+          color: {
+            field: "BaseProductCode",
+            type: "nominal",
+            scale: { scheme: "category10" },
+            legend: { title: "Product Code" },
+          },
         },
       };
 
@@ -118,6 +124,12 @@ function generateVegaLiteSpec(chartConfig, data) {
         encoding: {
           x: { field: chartConfig.xField, type: "temporal" },
           y: { field: chartConfig.yField, type: "quantitative" },
+          color: {
+            field: "BaseProductCode",
+            type: "nominal",
+            scale: { scheme: "category10" },
+            legend: { title: "Product Code" },
+          },
         },
       };
 
@@ -128,6 +140,12 @@ function generateVegaLiteSpec(chartConfig, data) {
         encoding: {
           x: { field: chartConfig.xField, type: "quantitative" },
           y: { field: chartConfig.yField, type: "quantitative" },
+          color: {
+            field: "BaseProductCode",
+            type: "nominal",
+            scale: { scheme: "category10" },
+            legend: { title: "Product Code" },
+          },
         },
       };
 
@@ -176,7 +194,7 @@ function applyFilters(data, filters) {
 app.post("/api/nlq", async (req, res) => {
   try {
     const { prompt } = req.body;
-    console.log("🔍 Query:", prompt);
+    console.log("Query:", prompt);
 
     if (shipmentData.length === 0) {
       return res.status(500).json({
@@ -189,7 +207,7 @@ app.post("/api/nlq", async (req, res) => {
     let chartSpec = null;
 
     // Try Ollama first
-    console.log("🤖 Querying Ollama...");
+    console.log("Querying Ollama...");
     const ollamaResponse = await queryOllama(prompt, shipmentData.slice(0, 5));
 
     if (ollamaResponse) {
@@ -198,7 +216,7 @@ app.post("/api/nlq", async (req, res) => {
         const responseMatch = ollamaResponse.match(/\{[\s\S]*\}/);
         if (responseMatch) {
           const aiInstructions = JSON.parse(responseMatch[0]);
-          console.log("🧠 AI Instructions:", aiInstructions);
+          console.log(" AI Instructions:", aiInstructions);
 
           if (aiInstructions.filters) {
             result = applyFilters(shipmentData, aiInstructions.filters);
@@ -212,17 +230,17 @@ app.post("/api/nlq", async (req, res) => {
               aiInstructions.chartConfig,
               result.slice(0, 50)
             );
-            console.log("📊 Generated chart spec:", aiInstructions.chartConfig);
+            console.log("Generated chart spec:", aiInstructions.chartConfig);
           }
         }
       } catch (parseError) {
-        console.log("⚠️ Could not parse AI response, using fallback");
+        console.log(" Could not parse AI response, using fallback");
       }
     }
 
     // Fallback to simple filtering if Ollama fails
     if (result.length === 0) {
-      console.log("🔄 Using fallback filtering");
+      console.log("Using fallback filtering");
       result = shipmentData.slice(0, 100);
 
       // Basic keyword filtering
@@ -244,7 +262,7 @@ app.post("/api/nlq", async (req, res) => {
       }
     }
 
-    console.log(`📊 Returning ${result.length} records`);
+    console.log(` Returning ${result.length} records`);
 
     let chartConfig = null;
 
@@ -257,7 +275,7 @@ app.post("/api/nlq", async (req, res) => {
           chartConfig = aiInstructions.chartConfig;
         }
       } catch (parseError) {
-        console.log("⚠️ Could not extract chart config");
+        console.log(" Could not extract chart config");
       }
     }
 
@@ -270,7 +288,7 @@ app.post("/api/nlq", async (req, res) => {
       chartConfig: chartConfig,
     });
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -284,6 +302,6 @@ app.get("/api/health", (req, res) => {
 
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📈 Loaded ${shipmentData.length} records`);
+  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(`Loaded ${shipmentData.length} records`);
 });
