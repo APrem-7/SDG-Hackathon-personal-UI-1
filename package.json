@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@kanaries/graphic-walker": "^0.4.77"
+  }
+}
